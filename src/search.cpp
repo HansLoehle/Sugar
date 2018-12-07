@@ -877,15 +877,16 @@ namespace {
         && (ss-1)->currentMove != MOVE_NULL
         && (ss-1)->statScore < 23200
         &&  eval >= beta
-        &&  pureStaticEval >= beta - 36 * depth / ONE_PLY + 225
+        &&  pureStaticEval >= beta - int(320 * log(depth / ONE_PLY)) + 500
         && !excludedMove
-        &&  pos.non_pawn_material(us)
+        &&  thisThread->selDepth + 5 > thisThread->rootDepth / ONE_PLY
+        &&  pos.non_pawn_material(us) > BishopValueMg
         && (ss->ply >= thisThread->nmpMinPly || us != thisThread->nmpColor))
     {
         assert(eval - beta >= 0);
 
         // Null move dynamic reduction based on depth and value
-        Depth R = ((823 + 67 * depth / ONE_PLY) / 256 + std::min(int(eval - beta) / 200, 3)) * ONE_PLY;
+        Depth R = std::max(1, int(2.6 * log(depth / ONE_PLY)) + std::min(int(eval - beta) / 200, 3)) * ONE_PLY; 
 
         ss->currentMove = MOVE_NULL;
         ss->continuationHistory = &thisThread->continuationHistory[NO_PIECE][0];
