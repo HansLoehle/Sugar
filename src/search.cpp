@@ -114,9 +114,10 @@ namespace {
     Move best = MOVE_NONE;
   };
   
-  bool doNull, cleanSearch;
+  bool doNull, doLMR, cleanSearch;
+  Depth maxLMR;
 
-  int tactical;
+  int tactical, variety;
 
   template <NodeType NT>
   Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, bool cutNode);
@@ -235,7 +236,10 @@ void MainThread::search() {
 
   // Read search options
   doNull = Options["NullMove"];
+  doLMR = Options["LMR"];
+  maxLMR = Options["MaxLMReduction"] * ONE_PLY;
   tactical = Options["ICCF Analyzes"];
+  variety = Options["Variety"];
   
   Options_Junior_Depth = 127;
   Options_Junior_Mobility = true;
@@ -1124,7 +1128,8 @@ moves_loop: // When in check, search starts from here
 
       // Step 16. Reduced depth search (LMR). If the move fails high it will be
       // re-searched at full depth.
-      if (    depth >= 3 * ONE_PLY
+	  if (    doLMR
+          &&  depth >= 3 * ONE_PLY
           &&  moveCount > 1
           && (!captureOrPromotion || moveCountPruning))
       {
@@ -1171,7 +1176,10 @@ moves_loop: // When in check, search starts from here
               // Decrease/increase reduction for moves with a good/bad history (~30 Elo)
               r -= ss->statScore / 20000 * ONE_PLY;
           }
-
+		  
+		  // Set maximum reduction
+          r = std::min(r, maxLMR);
+		  
           Depth d = std::max(newDepth - std::max(r, DEPTH_ZERO), ONE_PLY);
 
           value = -search<NonPV>(pos, ss+1, -(alpha+1), -alpha, d, true);
@@ -1520,6 +1528,9 @@ moves_loop: // When in check, search starts from here
           }
        }
     }
+	
+    if (variety && (bestValue + (variety * PawnValueEg / 100) >= 0 ))
+	  bestValue += rand() % (variety + 1);
 
     // All legal moves have been searched. A special case: If we're in check
     // and no legal moves were found, it is checkmate.
