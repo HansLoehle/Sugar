@@ -26,7 +26,6 @@
 #include <sstream>
 #include <random>
 
-#include "book.h"
 #include "evaluate.h"
 #include "misc.h"
 #include "movegen.h"
@@ -224,7 +223,6 @@ void MainThread::search() {
       return;
   }
 
-  static PolyglotBook book; // Defined static to initialize the PRNG only once
   Color us = rootPos.side_to_move();
   Time.init(Limits, us, rootPos.game_ply(), rootPos);
 //Hash			  
@@ -259,17 +257,6 @@ void MainThread::search() {
   }
   else
   {
-      if (bool(Options["OwnBook"]) && !Limits.infinite && !Limits.mate)
-      {
-          Move bookMove = book.probe(rootPos, Options["Book File"], Options["Best Book Move"]);
-
-          if (bookMove && std::count(rootMoves.begin(), rootMoves.end(), bookMove))
-          {
-              std::swap(rootMoves[0], *std::find(rootMoves.begin(), rootMoves.end(), bookMove));
-              goto finalize;
-          }
-      }
-	  
       for (Thread* th : Threads)
           if (th != this)
               th->start_searching();
@@ -277,7 +264,6 @@ void MainThread::search() {
       Thread::search(); // Let's start searching!
   }
 
-finalize:
   // When we reach the maximum depth, we can arrive here without a raise of
   // Threads.stop. However, if we are pondering or in an infinite search,
   // the UCI protocol states that we shouldn't print the best move before the

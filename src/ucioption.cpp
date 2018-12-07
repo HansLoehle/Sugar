@@ -74,14 +74,11 @@ void init(OptionsMap& o) {
   
   o["Debug Log File"]        << Option("", on_logger);
   o["Contempt"]              << Option(24, -100, 100);
-  o["Book File"]             << Option("book.bin");
-  o["Best Book Move"]        << Option(false);
   o["Analysis_CT"]           << Option("Both var Off var White var Black var Both", "Both");
   o["Threads"]               << Option(n, unsigned(1), unsigned(512), on_threads);
   o["Hash"]                  << Option(16, 1, MaxHashMB, on_hash_size);
   o["Clear_Hash"]            << Option(on_clear_hash);
   o["Ponder"]                << Option(false);
-  o["OwnBook"]               << Option(false);
   o["MultiPV"]               << Option(1, 1, 500);
   o["Skill Level"]           << Option(20, 0, 20);
   o["Move Overhead"]         << Option(100, 0, 5000);
