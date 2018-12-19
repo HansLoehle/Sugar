@@ -96,7 +96,7 @@ void init(OptionsMap& o) {
   o["Syzygy50MoveRule"]      << Option(true);
   o["SyzygyProbeLimit"]      << Option(7, 0, 7);
   o["Dynamic Strategy"]      << Option(true);
-  o["ICCF Analyzes"]         << Option(2, 0,  8);
+  o["ICCF Analyzes"]         << Option(0, 0,  8);
   o["Clear Search"]          << Option(false);
   o["NullMove"]              << Option(true);
   o["LMR"]                   << Option(true);
