@@ -217,7 +217,7 @@ public:
         fstat(fd, &statbuf);
         *mapping = statbuf.st_size;
         *baseAddress = mmap(nullptr, statbuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
-		madvise(*baseAddress, statbuf.st_size, MADV_RANDOM);
+        madvise(*baseAddress, statbuf.st_size, MADV_RANDOM);
         ::close(fd);
 
         if (*baseAddress == MAP_FAILED) {
@@ -225,8 +225,9 @@ public:
             exit(1);
         }
 #else
+        // Note FILE_FLAG_RANDOM_ACCESS is only a hint to Windows and as such may get ignored.       
         HANDLE fd = CreateFile(fname.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
-                               OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+                               OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, nullptr);
 
         if (fd == INVALID_HANDLE_VALUE)
             return *baseAddress = nullptr, nullptr;
@@ -501,7 +502,7 @@ int decompress_pairs(PairsData* d, uint64_t idx) {
     //       I(k) = k * d->span + d->span / 2      (1)
 
     // First step is to get the 'k' of the I(k) nearest to our idx, using definition (1)
-    uint32_t k = uint32_t(idx / d->span);
+    uint32_t k = idx / d->span;
 
     // Then we read the corresponding SparseIndex[] entry
     uint32_t block = number<uint32_t, LittleEndian>(&d->sparseIndex[k].block);
@@ -547,7 +548,7 @@ int decompress_pairs(PairsData* d, uint64_t idx) {
         // All the symbols of a given length are consecutive integers (numerical
         // sequence property), so we can compute the offset of our symbol of
         // length len, stored at the beginning of buf64.
-        sym = uint16_t((buf64 - d->base64[len]) >> (64 - len - d->minSymLen));
+        sym = (buf64 - d->base64[len]) >> (64 - len - d->minSymLen);
 
         // Now add the value of the lowest symbol of length len to get our symbol
         sym += number<Sym, LittleEndian>(&d->lowestSym[len]);
@@ -953,7 +954,7 @@ uint8_t* set_sizes(PairsData* d, uint8_t* data) {
 
     // groupLen[] is a zero-terminated list of group lengths, the last groupIdx[]
     // element stores the biggest index that is the tb size.
-    size_t tbSize = size_t(d->groupIdx[std::find(d->groupLen, d->groupLen + 7, 0) - d->groupLen]);
+    uint64_t tbSize = d->groupIdx[std::find(d->groupLen, d->groupLen + 7, 0) - d->groupLen];
 
     d->sizeofBlock = 1ULL << *data++;
     d->span = 1ULL << *data++;
