@@ -157,8 +157,6 @@ public:
   Score psq_score() const;
   Value non_pawn_material(Color c) const;
   Value non_pawn_material() const;
-  Value pawn_material(Color c) const;
-  Value pawn_material() const;
 
   // Position consistency check, for debugging
   bool pos_is_ok() const;
@@ -267,7 +265,7 @@ inline bool Position::can_castle(CastlingRight cr) const {
 }
 
 inline int Position::castling_rights(Color c) const {
-  return st->castlingRights & ((WHITE_OO | WHITE_OOO) << (2 * c));
+  return st->castlingRights & (c == WHITE ? WHITE_CASTLING : BLACK_CASTLING);
 }
 
 inline bool Position::castling_impeded(CastlingRight cr) const {
@@ -342,14 +340,6 @@ inline Value Position::non_pawn_material(Color c) const {
 
 inline Value Position::non_pawn_material() const {
   return st->nonPawnMaterial[WHITE] + st->nonPawnMaterial[BLACK];
-}
-
-inline Value Position::pawn_material() const {
-	return pawn_material(WHITE) + pawn_material(BLACK);
-}
-
-inline Value Position::pawn_material(Color c) const {
-	return PawnValueEg * pieceCount[make_piece(c, PAWN)];
 }
 
 inline int Position::game_ply() const {
