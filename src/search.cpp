@@ -620,7 +620,7 @@ namespace {
     Depth extension, newDepth;
     Value bestValue, value, ttValue, eval, maxValue, pureStaticEval;
     bool ttHit, pvHit, inCheck, givesCheck, improving;
-    bool captureOrPromotion, doFullDepthSearch, moveCountPruning, skipQuiets, ttCapture, pvExact;
+    bool captureOrPromotion, doFullDepthSearch, moveCountPruning, skipQuiets, ttCapture;
     Piece movedPiece;
     int moveCount, captureCount, quietCount;
 
@@ -719,7 +719,7 @@ namespace {
         return ttValue;
     }
 
-    if (   depth > 6 * ONE_PLY
+    if (   depth > 4 * ONE_PLY
         && !excludedMove
         && PvNode)
         pvHit = true;
@@ -940,7 +940,6 @@ moves_loop: // When in check, search starts from here
 
     skipQuiets = false;
     ttCapture = ttMove && pos.capture_or_promotion(ttMove);
-    pvExact = PvNode && ttHit && tte->bound() == BOUND_EXACT;
 
     // Step 12. Loop through all pseudo-legal moves until no moves remain
     // or a beta cutoff occurs.
@@ -1085,7 +1084,7 @@ moves_loop: // When in check, search starts from here
           Depth r = reduction<PvNode>(improving, depth, moveCount);
 
           // Decrease reduction if position is or has been on the PV
-          if (pvHit && !PvNode)
+          if (pvHit)
               r -= ONE_PLY;
 
           // Decrease reduction if opponent's move count is high (~10 Elo)
@@ -1094,10 +1093,6 @@ moves_loop: // When in check, search starts from here
 
           if (!captureOrPromotion)
           {
-              // Decrease reduction for exact PV nodes (~0 Elo)
-              if (pvExact)
-                  r -= ONE_PLY;
-
               // Increase reduction if ttMove is a capture (~0 Elo)
               if (ttCapture)
                   r += ONE_PLY;
