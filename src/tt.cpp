@@ -467,7 +467,7 @@ void TranspositionTable::load_epd_to_hash() {
 			bool ttHit;
 			tte = TT.probe(pos.key(), ttHit);
 
-			tte->save(pos.key(), (Value)ce, BOUND_EXACT, (Depth)depth,
+			tte->save(pos.key(), (Value)ce, true, BOUND_EXACT, (Depth)depth, 
 				bm, VALUE_NONE);
 		}
 		myfile.close();
