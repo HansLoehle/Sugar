@@ -685,7 +685,7 @@ namespace {
     ttValue = ttHit ? value_from_tt(tte->value(), ss->ply) : VALUE_NONE;
     ttMove =  rootNode ? thisThread->rootMoves[thisThread->pvIdx].pv[0]
             : ttHit    ? tte->move() : MOVE_NONE;
-    pvHit = ttHit ? tte->pv_hit() : false;
+    pvHit = ttHit && tte->pv_hit();
 
     // At non-PV nodes we check for an early TT cutoff
     if (  !PvNode
@@ -923,7 +923,7 @@ namespace {
         tte = TT.probe(posKey, ttHit);
         ttValue = ttHit ? value_from_tt(tte->value(), ss->ply) : VALUE_NONE;
         ttMove = ttHit ? tte->move() : MOVE_NONE;
-        pvHit = ttHit ? tte->pv_hit() : false;
+        pvHit = ttHit && tte->pv_hit();
     }
 
 moves_loop: // When in check, search starts from here
@@ -1334,7 +1334,7 @@ moves_loop: // When in check, search starts from here
     tte = TT.probe(posKey, ttHit);
     ttValue = ttHit ? value_from_tt(tte->value(), ss->ply) : VALUE_NONE;
     ttMove = ttHit ? tte->move() : MOVE_NONE;
-    pvHit = ttHit ? tte->pv_hit() : false;
+    pvHit = ttHit && tte->pv_hit();
 
     if (  !PvNode
         && ttHit
