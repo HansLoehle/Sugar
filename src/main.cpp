@@ -45,7 +45,8 @@ int main(int argc, char* argv[]) {
   Search::init();
   Pawns::init();
   Threads.set(Options["Threads"]);
-  polybook.init(Options["BookFile"]);
+  polybook1.init(Options["BookFile1"]);
+  polybook2.init(Options["BookFile2"]);
   Search::clear(); // After threads are up
 
   UCI::loop(argc, argv);

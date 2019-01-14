@@ -88,6 +88,7 @@ private:
     bool enabled, do_search;
 };
 
-extern PolyBook polybook;
+extern PolyBook polybook1;
+extern PolyBook polybook2;
 
 #endif // #ifndef POLYBOOK_H_INCLUDED

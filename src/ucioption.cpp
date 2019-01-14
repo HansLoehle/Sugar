@@ -52,10 +52,12 @@ void SaveHashtoFile(const Option&) { TT.save(); }
 void LoadHashfromFile(const Option&) { TT.load(); }
 void LoadEpdToHash(const Option&) { TT.load_epd_to_hash(); }
 //end_Hash
-void on_book_file(const Option& o) { polybook.init(o); }
-void on_best_book_move(const Option& o) { polybook.set_best_book_move(o); }
-void on_book_depth(const Option& o) { polybook.set_book_depth(o); }
-
+void on_book_file1(const Option& o) { polybook1.init(o); }
+void on_book_file2(const Option& o) { polybook2.init(o); }
+void on_best_book_move1(const Option& o) { polybook1.set_best_book_move(o); }
+void on_best_book_move2(const Option& o) { polybook2.set_best_book_move(o); }
+void on_book_depth1(const Option& o) { polybook1.set_book_depth(o); }
+void on_book_depth2(const Option& o) { polybook2.set_book_depth(o); }
 
 /// Our case insensitive less() function as required by UCI protocol
 bool CaseInsensitiveLess::operator() (const string& s1, const string& s2) const {
@@ -72,6 +74,16 @@ void init(OptionsMap& o) {
   // at most 2^32 clusters.
   constexpr int MaxHashMB = Is64Bit ? 131072 : 2048;
 
+  o["Use Book1"] << Option(false);
+  o["BestBook1Move"] << Option(false, on_best_book_move1);
+  o["BookFile1"] << Option("book1.bin", on_book_file1);
+  o["BookDepth1"] << Option(100, 1, 120, on_book_depth1);
+  
+  o["Use Book2"] << Option(false);
+  o["BestBook2Move"] << Option(false, on_best_book_move2);
+  o["BookFile2"] << Option("book2.bin", on_book_file2);
+  o["BookDepth2"] << Option(100, 1, 120, on_book_depth2);
+  
   o["Debug Log File"]        << Option("", on_logger);
   o["Contempt"]              << Option(24, -100, 100);
   o["Analysis Contempt"]     << Option("Both var Off var White var Black var Both", "Both");
@@ -97,9 +109,6 @@ void init(OptionsMap& o) {
   o["SyzygyProbeDepth"]      << Option(1, 1, 100);
   o["Syzygy50MoveRule"]      << Option(true);
   o["SyzygyProbeLimit"]      << Option(7, 0, 7);
-  o["BookFile"]              << Option("<empty>", on_book_file);
-  o["BestBookMove"]          << Option(true, on_best_book_move);
-  o["BookDepth"]             << Option(100, 1, 120, on_book_depth);
 }
 
 

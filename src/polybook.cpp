@@ -26,7 +26,8 @@
 #include "misc.h"
 #include <sys/timeb.h>
 
-PolyBook polybook;  // global PolyBook
+PolyBook polybook1;  // global PolyBook1
+PolyBook polybook2;  // global PolyBook2
 
 using namespace std;
 
