@@ -42,7 +42,8 @@ int main(int argc, char* argv[]) {
   Bitboards::init();
   Position::init();
   Bitbases::init();
-  Search::init();
+
+  Search::init(Options["Clear Search"]);
   Pawns::init();
   Threads.set(Options["Threads"]);
   polybook1.init(Options["BookFile1"]);

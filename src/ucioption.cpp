@@ -74,6 +74,9 @@ void init(OptionsMap& o) {
   // at most 2^32 clusters.
   constexpr int MaxHashMB = Is64Bit ? 131072 : 2048;
 
+  unsigned n = std::thread::hardware_concurrency();
+  if (!n) n = 1;
+
   o["Use Book1"] << Option(false);
   o["BestBook1Move"] << Option(false, on_best_book_move1);
   o["BookFile1"] << Option("book1.bin", on_book_file1);
@@ -86,10 +89,10 @@ void init(OptionsMap& o) {
   
   o["Debug Log File"]        << Option("", on_logger);
   o["Contempt"]              << Option(24, -100, 100);
-  o["Analysis Contempt"]     << Option("Both var Off var White var Black var Both", "Both");
-  o["Threads"]               << Option(1, 1, 512, on_threads);
+  o["Analysis_CT"]           << Option("Both var Off var White var Black var Both", "Both");
+  o["Threads"]               << Option(n, unsigned(1), unsigned(512), on_threads);
   o["Hash"]                  << Option(16, 1, MaxHashMB, on_hash_size);
-  o["Clear Hash"]            << Option(on_clear_hash);
+  o["Clear_Hash"]            << Option(on_clear_hash);
   o["Ponder"]                << Option(false);
   o["MultiPV"]               << Option(1, 1, 500);
   o["Skill Level"]           << Option(20, 0, 20);
@@ -109,6 +112,9 @@ void init(OptionsMap& o) {
   o["SyzygyProbeDepth"]      << Option(1, 1, 100);
   o["Syzygy50MoveRule"]      << Option(true);
   o["SyzygyProbeLimit"]      << Option(7, 0, 7);
+  o["ICCF Analyzes"]         << Option(0, 0,  8);
+  o["Clear Search"]          << Option(false);
+  o["NullMove"]              << Option(true);
 }
 
 

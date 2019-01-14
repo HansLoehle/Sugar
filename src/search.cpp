@@ -112,6 +112,10 @@ namespace {
     int level;
     Move best = MOVE_NONE;
   };
+  
+  bool doNullcleanSearch;
+
+  int tactical;
 
   template <NodeType NT>
   Value search(Position& pos, Stack* ss, Value alpha, Value beta, Depth depth, bool cutNode);
@@ -164,7 +168,8 @@ namespace {
 
 /// Search::init() is called at startup to initialize various lookup tables
 
-void Search::init() {
+void Search::init(bool OptioncleanSearch) {
+  cleanSearch = OptioncleanSearch;
 
   for (int imp = 0; imp <= 1; ++imp)
       for (int d = 1; d < 64; ++d)
@@ -226,6 +231,9 @@ void MainThread::search() {
   TT.infinite_search();
 //end_hash
 
+  // Read search options
+  doNull = Options["NullMove"];
+  tactical = Options["ICCF Analyzes"];
   Options_Junior_Depth = 127;
   Options_Junior_Mobility = true;
   Options_Junior_King = true;
@@ -365,6 +373,9 @@ void Thread::search() {
      (ss-i)->continuationHistory = &this->continuationHistory[NO_PIECE][0]; // Use as sentinel
   ss->pv = pv;
 
+  if (cleanSearch)
+	  Search::clear();
+
   bestValue = delta = alpha = -VALUE_INFINITE;
   beta = VALUE_INFINITE;
 
@@ -374,6 +385,8 @@ void Thread::search() {
   size_t multiPV = Options["MultiPV"];
   Skill skill(Options["Skill Level"]);
 
+  if (tactical) multiPV = size_t(pow(2, tactical));
+  
   // When playing with strength handicap enable MultiPV search that we will
   // use behind the scenes to retrieve a set of possible moves.
   if (skill.enabled())
@@ -385,10 +398,10 @@ void Thread::search() {
 
   // In analysis mode, adjust contempt in accordance with user preference
   if (Limits.infinite || Options["UCI_AnalyseMode"])
-      ct =  Options["Analysis Contempt"] == "Off"  ? 0
-          : Options["Analysis Contempt"] == "Both" ? ct
-          : Options["Analysis Contempt"] == "White" && us == BLACK ? -ct
-          : Options["Analysis Contempt"] == "Black" && us == WHITE ? -ct
+      ct =  Options["Analysis_CT"] == "Off"  ? 0
+          : Options["Analysis_CT"] == "Both" ? ct
+          : Options["Analysis_CT"] == "White" && us == BLACK ? -ct
+          : Options["Analysis_CT"] == "Black" && us == WHITE ? -ct
           : ct;
 
   // In evaluate.cpp the evaluation is from the white point of view
@@ -827,7 +840,8 @@ namespace {
         return eval;
 
     // Step 9. Null move search with verification search (~40 Elo)
-    if (   !PvNode
+    if (    doNull
+        && !PvNode
         && (ss-1)->currentMove != MOVE_NULL
         && (ss-1)->statScore < 23200
         &&  eval >= beta
